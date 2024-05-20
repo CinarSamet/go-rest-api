@@ -62,7 +62,7 @@ func main() {
 	//admin endpoint
 	r.Route("/admin", func(r chi.Router) {
 		r.Use(AdminOnly)
-		r.Get("/todos")
+		r.Get("/todos", to_do_func.ListAllTodos)
 		r.Post("/todos")
 		r.Put("/todos/{id}")
 		r.Delete("/todos/{id}")

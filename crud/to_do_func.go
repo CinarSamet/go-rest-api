@@ -33,3 +33,23 @@ func ListTodos(w http.ResponseWriter, r *http.Request) {
 	encoder.SetIndent("", "\n")
 	encoder.Encode(filteredTodos)
 }
+func ListAllTodos(w http.ResponseWriter, r *http.Request) {
+	allTodos := []models.ToDo{}
+	mutex.Lock()
+	for _, todos := range userTodos {
+		for _, todo := range todos {
+			if !todo.DeletedOn.IsZero() {
+				// If the ToDo is deleted, append ' (deleted)' to the description.
+				todo.Description += " (deleted)"
+			}
+			allTodos = append(allTodos, todo)
+		}
+	}
+	mutex.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "\n")
+	encoder.Encode(allTodos)
+}
