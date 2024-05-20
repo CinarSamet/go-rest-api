@@ -74,3 +74,25 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	userTodos[username][todo.ID] = todo
 	json.NewEncoder(w).Encode(todo)
 }
+func AdminCreateOwnTodo(w http.ResponseWriter, r *http.Request) {
+	var todo models.ToDo
+	err := json.NewDecoder(r.Body).Decode(&todo)
+	if err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+	username := "admin"
+	mutex.Lock()
+	defer mutex.Unlock()
+	if userTodos[username] == nil {
+		userTodos[username] = make(map[int]models.ToDo)
+	}
+	todo.ID = userIDCounters[username] + 1
+	userIDCounters[username]++
+	todo.CreatedOn = time.Now()
+	todo.User = username
+	userTodos[username][todo.ID] = todo
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(todo)
+	w.Write([]byte("ToDo successfully Created"))
+}
