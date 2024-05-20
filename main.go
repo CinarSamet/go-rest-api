@@ -60,6 +60,7 @@ func main() {
 	})
 	//admin endpoint
 	r.Route("/admin", func(r chi.Router) {
+		r.Use(AdminOnly)
 		r.Get("/todos")
 		r.Post("/todos")
 		r.Put("/todos/{id}")
@@ -82,6 +83,19 @@ func OnlyUsers(next http.Handler) http.Handler {
 		tokenUserName := strings.ToLower(claims["name"].(string))
 		urlUserName := strings.ToLower(chi.URLParam(r, "username"))
 		if tokenUserName != urlUserName {
+			http.Error(w, "Not Allowed", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// check admin permissions
+func AdminOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, claims, _ := jwtauth.FromContext(r.Context())
+		role := claims["role"].(string)
+		if role != "admin" {
 			http.Error(w, "Not Allowed", http.StatusForbidden)
 			return
 		}
