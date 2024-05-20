@@ -56,7 +56,7 @@ func main() {
 		r.Use(OnlyUsers)
 		r.Get("/todos", to_do_func.ListTodos)
 		r.Post("/todos", to_do_func.CreateTodo)
-		r.Put("/todos/{id}")
+		r.Put("/todos/{id}", to_do_func.UpdateTodo)
 		r.Delete("/todos/{id}")
 	})
 	//admin endpoint

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"go-rest-api/models"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -95,4 +96,41 @@ func AdminCreateOwnTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(todo)
 	w.Write([]byte("ToDo successfully Created"))
+}
+func UpdateTodo(w http.ResponseWriter, r *http.Request) {
+	username := chi.URLParam(r, "username")
+	todoID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ToDo ID", http.StatusBadRequest)
+		return
+	}
+
+	var updatedTodo models.ToDo
+	err = json.NewDecoder(r.Body).Decode(&updatedTodo)
+	if err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	mutex.Lock()
+	todos := userTodos[username]
+	mutex.Unlock()
+
+	todo, exists := todos[todoID]
+	if !exists || !todo.DeletedOn.IsZero() {
+		http.Error(w, "ToDo not found", http.StatusNotFound)
+		return
+	}
+
+	updatedTodo.ID = todoID
+	updatedTodo.CreatedOn = todo.CreatedOn
+	updatedTodo.ChangedOn = time.Now()
+	updatedTodo.User = todo.User
+
+	mutex.Lock()
+	userTodos[username][todoID] = updatedTodo
+	mutex.Unlock()
+
+	json.NewEncoder(w).Encode(updatedTodo)
+	w.Write([]byte("ToDo successfully updated"))
 }
