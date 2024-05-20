@@ -49,4 +49,24 @@ func main() {
 			fmt.Fprintf(w, "Login failed")
 		}
 	})
+	//users endpoint
+	r.Route("/{username}", func(r chi.Router) {
+		r.Get("/todos")
+		r.Post("/todos")
+		r.Put("/todos/{id}")
+		r.Delete("/todos/{id}")
+	})
+	//admin endpoint
+	r.Route("/admin", func(r chi.Router) {
+		r.Get("/todos")
+		r.Post("/todos")
+		r.Put("/todos/{id}")
+		r.Delete("/todos/{id}")
+
+		// authorized endpoint
+		r.Get("/users/{username}/todos")
+		r.Post("/users/{username}/todos")
+		r.Put("/users/{username}/todos/{id}")
+		r.Delete("/users/{username}/todos/{id}")
+	})
 }
