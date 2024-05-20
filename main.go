@@ -55,7 +55,7 @@ func main() {
 	r.Route("/{username}", func(r chi.Router) {
 		r.Use(OnlyUsers)
 		r.Get("/todos", to_do_func.ListTodos)
-		r.Post("/todos")
+		r.Post("/todos", to_do_func.CreateTodo)
 		r.Put("/todos/{id}")
 		r.Delete("/todos/{id}")
 	})

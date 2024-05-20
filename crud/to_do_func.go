@@ -5,6 +5,7 @@ import (
 	"go-rest-api/models"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -52,4 +53,24 @@ func ListAllTodos(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	encoder.SetIndent("", "\n")
 	encoder.Encode(allTodos)
+}
+func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	username := chi.URLParam(r, "username")
+	var todo models.ToDo
+	err := json.NewDecoder(r.Body).Decode(&todo)
+	if err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+	mutex.Lock()
+	defer mutex.Unlock()
+	if userTodos[username] == nil {
+		userTodos[username] = make(map[int]models.ToDo)
+	}
+	todo.ID = userIDCounters[username] + 1
+	userIDCounters[username]++
+	todo.CreatedOn = time.Now()
+	todo.User = username
+	userTodos[username][todo.ID] = todo
+	json.NewEncoder(w).Encode(todo)
 }
