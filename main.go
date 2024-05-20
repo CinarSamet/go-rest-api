@@ -69,8 +69,8 @@ func main() {
 
 		// authorized endpoint
 		r.Get("/users/{username}/todos", to_do_func.AdminListUserTodos)
-		r.Post("/users/{username}/todos")
-		r.Put("/users/{username}/todos/{id}")
+		r.Post("/users/{username}/todos", to_do_func.AdminCreateUserTodo)
+		r.Put("/users/{username}/todos/{id}", to_do_func.AdminUpdateUserTodo)
 		r.Delete("/users/{username}/todos/{id}")
 	})
 	http.ListenAndServe(":8080", r)
