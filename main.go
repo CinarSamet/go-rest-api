@@ -69,4 +69,6 @@ func main() {
 		r.Put("/users/{username}/todos/{id}")
 		r.Delete("/users/{username}/todos/{id}")
 	})
+	http.ListenAndServe(":8080", r)
+
 }
