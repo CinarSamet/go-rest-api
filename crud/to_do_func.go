@@ -134,3 +134,37 @@ func UpdateTodo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedTodo)
 	w.Write([]byte("ToDo successfully updated"))
 }
+func AdminUpdateOwnTodo(w http.ResponseWriter, r *http.Request) {
+	username := "admin"
+	todoID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ToDo ID", http.StatusBadRequest)
+		return
+	}
+
+	var updatedTodo models.ToDo
+	err = json.NewDecoder(r.Body).Decode(&updatedTodo)
+	if err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	mutex.Lock()
+	defer mutex.Unlock()
+	todos := userTodos[username]
+
+	todo, exists := todos[todoID]
+	if !exists || !todo.DeletedOn.IsZero() {
+		http.Error(w, "ToDo not found", http.StatusNotFound)
+		return
+	}
+
+	updatedTodo.ID = todoID
+	updatedTodo.CreatedOn = todo.CreatedOn
+	updatedTodo.ChangedOn = time.Now()
+	updatedTodo.User = username
+	userTodos[username][todoID] = updatedTodo
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ToDo successfully updated"))
+}

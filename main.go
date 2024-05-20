@@ -64,7 +64,7 @@ func main() {
 		r.Use(AdminOnly)
 		r.Get("/todos", to_do_func.ListAllTodos)
 		r.Post("/todos", to_do_func.AdminCreateOwnTodo)
-		r.Put("/todos/{id}")
+		r.Put("/todos/{id}", to_do_func.AdminUpdateOwnTodo)
 		r.Delete("/todos/{id}")
 
 		// authorized endpoint
