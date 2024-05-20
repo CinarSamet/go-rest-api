@@ -7,6 +7,7 @@ import (
 	"go-rest-api/models"
 	"go-rest-api/utils"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
@@ -51,6 +52,7 @@ func main() {
 	})
 	//users endpoint
 	r.Route("/{username}", func(r chi.Router) {
+		r.Use(OnlyUsers)
 		r.Get("/todos")
 		r.Post("/todos")
 		r.Put("/todos/{id}")
@@ -71,4 +73,18 @@ func main() {
 	})
 	http.ListenAndServe(":8080", r)
 
+}
+
+// check user permissions
+func OnlyUsers(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, claims, _ := jwtauth.FromContext(r.Context())
+		tokenUserName := strings.ToLower(claims["name"].(string))
+		urlUserName := strings.ToLower(chi.URLParam(r, "username"))
+		if tokenUserName != urlUserName {
+			http.Error(w, "Not Allowed", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
