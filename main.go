@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	to_do_func "go-rest-api/crud"
 	"go-rest-api/helpers"
 	"go-rest-api/login"
 	"go-rest-api/models"
@@ -53,7 +54,7 @@ func main() {
 	//users endpoint
 	r.Route("/{username}", func(r chi.Router) {
 		r.Use(OnlyUsers)
-		r.Get("/todos")
+		r.Get("/todos", to_do_func.ListTodos)
 		r.Post("/todos")
 		r.Put("/todos/{id}")
 		r.Delete("/todos/{id}")
