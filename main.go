@@ -68,7 +68,7 @@ func main() {
 		r.Delete("/todos/{id}", to_do_func.AdminDeleteOwnTodo)
 
 		// authorized endpoint
-		r.Get("/users/{username}/todos")
+		r.Get("/users/{username}/todos", to_do_func.AdminListUserTodos)
 		r.Post("/users/{username}/todos")
 		r.Put("/users/{username}/todos/{id}")
 		r.Delete("/users/{username}/todos/{id}")
