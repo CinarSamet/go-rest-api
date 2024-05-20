@@ -192,3 +192,27 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Successfully deleted."))
 }
+func AdminDeleteOwnTodo(w http.ResponseWriter, r *http.Request) {
+	username := "admin"
+	todoID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ToDo ID", http.StatusBadRequest)
+		return
+	}
+
+	mutex.Lock()
+	defer mutex.Unlock()
+	todos := userTodos[username]
+
+	todo, exists := todos[todoID]
+	if !exists || !todo.DeletedOn.IsZero() {
+		http.Error(w, "ToDo not found", http.StatusNotFound)
+		return
+	}
+
+	todo.DeletedOn = time.Now()
+	userTodos[username][todoID] = todo
+
+	w.WriteHeader(http.StatusNoContent)
+	w.Write([]byte("ToDo successfully deleted"))
+}
